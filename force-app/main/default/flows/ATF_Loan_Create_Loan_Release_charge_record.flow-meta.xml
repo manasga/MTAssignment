@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>64.0</apiVersion>
+    <decisions>
+        <name>Check_if_there_is_a_release_record_associated_with_the_Loan</name>
+        <label>Check if there is a release record associated with the Loan</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <defaultConnectorLabel>Loan Charge Record exists of Type Release Charge</defaultConnectorLabel>
+        <rules>
+            <name>No_Loan_Charge_Record_exists_of_type_Release_Charge</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>Get_Loan_Release_Charge_Records</leftValueReference>
+                <operator>IsNull</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Create_Loan_Charge_Record</targetReference>
+            </connector>
+            <label>No Loan Charge Record exists of type Release Charge</label>
+        </rules>
+    </decisions>
+    <environments>Default</environments>
+    <formulas>
+        <name>chargeDateVar</name>
+        <dataType>Date</dataType>
+        <expression>ADDMONTHS({!$Record.Date_Loan_Issued__c} , {!$Record.Term__c})</expression>
+    </formulas>
+    <interviewLabel>ATF: Loan: Create Loan Release charge record {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>ATF: Loan: Create Loan Release charge record</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>CanvasMode</name>
+        <value>
+            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>OriginBuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processType>AutoLaunchedFlow</processType>
+    <recordCreates>
+        <name>Create_Loan_Charge_Record</name>
+        <label>Create Loan Charge Record</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <inputAssignments>
+            <field>Amount__c</field>
+            <value>
+                <numberValue>500.0</numberValue>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Charge_Type__c</field>
+            <value>
+                <stringValue>Release Charge</stringValue>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Date__c</field>
+            <value>
+                <elementReference>chargeDateVar</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Loan__c</field>
+            <value>
+                <elementReference>$Record.Id</elementReference>
+            </value>
+        </inputAssignments>
+        <object>Loan_Charge__c</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordCreates>
+    <recordLookups>
+        <name>Get_Loan_Release_Charge_Records</name>
+        <label>Get Loan Release Charge Records</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
+        <connector>
+            <targetReference>Check_if_there_is_a_release_record_associated_with_the_Loan</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Loan__c</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>$Record.Id</elementReference>
+            </value>
+        </filters>
+        <filters>
+            <field>Charge_Type__c</field>
+            <operator>EqualTo</operator>
+            <value>
+                <stringValue>Release Charge</stringValue>
+            </value>
+        </filters>
+        <getFirstRecordOnly>true</getFirstRecordOnly>
+        <object>Loan_Charge__c</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordLookups>
+    <start>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Get_Loan_Release_Charge_Records</targetReference>
+        </connector>
+        <object>Loan__c</object>
+        <recordTriggerType>Create</recordTriggerType>
+        <triggerType>RecordAfterSave</triggerType>
+    </start>
+    <status>Active</status>
+</Flow>
